@@ -13,6 +13,7 @@ import static javax.persistence.FetchType.LAZY;
 @Getter
 @Setter
 @ToString
+@Builder
 
 @Entity
 @Table(name = "sub_reddit")
