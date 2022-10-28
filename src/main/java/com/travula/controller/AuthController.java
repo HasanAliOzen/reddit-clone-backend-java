@@ -1,5 +1,7 @@
 package com.travula.controller;
 
+import com.travula.dto.AuthenticationResponse;
+import com.travula.dto.LoginRequest;
 import com.travula.dto.RegisterRequest;
 import com.travula.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +32,11 @@ public class AuthController {
         authService.updateVerificationToken(id);
         return ResponseEntity.ok("Verification email send!");
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest){
+        return ResponseEntity.ok(authService.login(loginRequest));
+    }
+
 
 }

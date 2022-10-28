@@ -1,5 +1,7 @@
 package com.travula.service;
 
+import com.travula.dto.AuthenticationResponse;
+import com.travula.dto.LoginRequest;
 import com.travula.dto.RegisterRequest;
 import com.travula.exceptions.SpringRedditException;
 import com.travula.model.NotificationEmail;
@@ -7,7 +9,12 @@ import com.travula.model.User;
 import com.travula.model.VerificationToken;
 import com.travula.repository.UserRepository;
 import com.travula.repository.VerificationTokenRepository;
+import com.travula.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +31,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public void signup(RegisterRequest registerRequest){
@@ -84,5 +93,13 @@ public class AuthService {
         User user = verificationToken.getUser();
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public AuthenticationResponse login(LoginRequest loginRequest){
+        Authentication authenticate= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String token = jwtProvider.generateToken(authenticate);
+        return new AuthenticationResponse(token, loginRequest.getUsername());
     }
 }
