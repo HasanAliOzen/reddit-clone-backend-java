@@ -35,6 +35,9 @@ public class Post extends BaseEntity{
     @Column(name = "vote_count")
     private Integer voteCount;
 
+    @Column(name = "comment_count")
+    private Integer commentCount;
+
     @ManyToOne(fetch = LAZY)
     private User user;
 

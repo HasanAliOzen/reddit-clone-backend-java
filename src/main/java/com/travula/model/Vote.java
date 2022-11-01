@@ -10,12 +10,13 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @ToString
+@Builder
 
 @Entity
 @Table(name = "vote")
 public class Vote extends BaseEntity{
     @Enumerated
-    private VoteType votetype;
+    private VoteType voteType;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

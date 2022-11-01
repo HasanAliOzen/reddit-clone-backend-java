@@ -1,6 +1,7 @@
 package com.travula.controller;
 
 import com.travula.dto.PostRequest;
+import com.travula.dto.PostResponse;
 import com.travula.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,22 +24,22 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostRequest> getPost(@PathVariable Long id){
+    public ResponseEntity<PostResponse> getPost(@PathVariable Long id){
         return ResponseEntity.ok(postService.getPost(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<PostRequest>> getAllPosts(){
+    public ResponseEntity<List<PostResponse>> getAllPosts(){
         return ResponseEntity.ok(postService.getAllPosts());
     }
 
     @GetMapping("/by-subreddit/{id}")
-    public ResponseEntity<List<PostRequest>> getPostsBySubreddit(@PathVariable Long id){
+    public ResponseEntity<List<PostResponse>> getPostsBySubreddit(@PathVariable Long id){
         return ResponseEntity.ok(postService.getPostsBySubreddit(id));
     }
 
     @GetMapping("/by-username/{username}")
-    public ResponseEntity<List<PostRequest>> getPostsByUser(@PathVariable String username){
+    public ResponseEntity<List<PostResponse>> getPostsByUser(@PathVariable String username){
         return ResponseEntity.ok(postService.getPostsByUsername(username));
     }
 

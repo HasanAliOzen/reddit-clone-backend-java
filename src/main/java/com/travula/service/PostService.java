@@ -1,13 +1,13 @@
 package com.travula.service;
 
 import com.travula.dto.PostRequest;
+import com.travula.dto.PostResponse;
 import com.travula.exceptions.SpringRedditException;
-import com.travula.model.Post;
-import com.travula.model.Subreddit;
-import com.travula.model.User;
+import com.travula.model.*;
 import com.travula.repository.PostRepository;
 import com.travula.repository.SubredditRepository;
 import com.travula.repository.UserRepository;
+import com.travula.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +25,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final SubredditRepository subredditRepository;
     private final UserRepository userRepository;
+    private final VoteRepository voteRepository;
     private final AuthService authService;
 
     @Transactional
@@ -36,7 +37,7 @@ public class PostService {
         Subreddit subreddit =subredditRepository.findByName(postRequest.getSubredditName())
                 .orElseThrow(()-> new ProviderNotFoundException("No Subreddit with name " + postRequest.getSubredditName()));
 
-        Post save = map(postRequest,subreddit,authService.getCurrentUser());
+        Post save = mapRequest(postRequest,subreddit,authService.getCurrentUser());
         save.setCreatedDate(Instant.now());
         Post post = postRepository.save(save);
         subreddit.getPosts().add(post);
@@ -44,13 +45,13 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostRequest> getAllPosts() {
+    public List<PostResponse> getAllPosts() {
         return postRepository.findAll()
-                .stream().map(this::mapToDto)
+                .stream().map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    private Post map(PostRequest postRequest, Subreddit subreddit, User user) {
+    private Post mapRequest(PostRequest postRequest, Subreddit subreddit, User user) {
         if (postRequest == null){
             return null;
         }
@@ -62,31 +63,41 @@ public class PostService {
                 .user(user)
                 .subreddit(subreddit)
                 .voteCount(0)
+                .commentCount(0)
                 .build();
     }
 
-    private PostRequest mapToDto(Post post){
+    private PostResponse mapToResponse(Post post){
         if (post == null){
             return null;
         }
+        Vote vote = voteRepository.findByPostAndUser(post,authService.getCurrentUser())
+                .orElse(Vote.builder()
+                                .voteType(VoteType.NOVOTE)
+                                .build());
 
-        return PostRequest.builder()
+        return PostResponse.builder()
                 .postId(post.getId())
                 .postName(post.getPostName())
                 .url(post.getUrl())
                 .description(post.getDescription())
+                .userName(post.getUser().getUsername())
                 .subredditName(post.getSubreddit().getName())
+                .voteCount(post.getVoteCount())
+                .commentCount(post.getCommentCount())
+                .upVote(vote.getVoteType().getDirection() == 1)
+                .downVote(vote.getVoteType().getDirection() == -1)
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public PostRequest getPost(Long id) {
-        return mapToDto(postRepository.findById(id)
+    public PostResponse getPost(Long id) {
+        return mapToResponse(postRepository.findById(id)
                 .orElseThrow(()-> new ProviderNotFoundException("No post with id " + id)));
     }
 
     @Transactional(readOnly = true)
-    public List<PostRequest> getPostsBySubreddit(Long id) {
+    public List<PostResponse> getPostsBySubreddit(Long id) {
         List<Post> postList = postRepository
                 .findAllBySubreddit(
                         subredditRepository.findById(id)
@@ -95,18 +106,18 @@ public class PostService {
 
         return postList
                 .stream()
-                .map(this::mapToDto).toList();
+                .map(this::mapToResponse).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<PostRequest> getPostsByUsername(String username) {
+    public List<PostResponse> getPostsByUsername(String username) {
         return postRepository
                 .findAllByUser(
                         userRepository.findByUsername(username)
                                 .orElseThrow(
                                         ()-> new ProviderNotFoundException("No user with username " + username)))
                 .stream()
-                .map(this::mapToDto)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 }

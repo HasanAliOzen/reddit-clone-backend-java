@@ -42,6 +42,8 @@ public class CommentService {
         Comment comment = map(commentDto,post,authService.getCurrentUser());
         comment.setCreatedDate(Instant.now());
         commentRepository.save(comment);
+        post.setCommentCount(post.getCommentCount()+1);
+        postRepository.save(post);
 
         String message = mailContentBuilder.build(comment.getUser().getUsername() + " posted a comment on your post " + POST_URL);
         sendCommentNotification(message,post.getUser());
