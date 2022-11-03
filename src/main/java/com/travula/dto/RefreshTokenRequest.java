@@ -2,7 +2,7 @@ package com.travula.dto;
 
 import lombok.*;
 
-import java.time.Instant;
+import javax.validation.constraints.NotBlank;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -10,9 +10,8 @@ import java.time.Instant;
 @Setter
 @ToString
 @Builder
-public class AuthenticationResponse {
-    private String authenticationToken;
-    private Instant expiresAt;
+public class RefreshTokenRequest {
+    @NotBlank
     private String refreshToken;
     private String username;
 }
