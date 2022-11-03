@@ -3,6 +3,7 @@ package com.travula.config;
 import com.travula.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,6 +35,11 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests( auth -> auth
                         .antMatchers("/api/auth/**").permitAll()
+                        .antMatchers(HttpMethod.GET, "/api/subreddit").permitAll()
+                        .antMatchers(HttpMethod.GET, "/api/posts/").permitAll()
+                        .antMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+                        .antMatchers("/v3/api-docs/**",
+                                "/swagger-ui/**").permitAll()
                         .anyRequest()
                         .authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -81,6 +81,13 @@
             <scope>runtime</scope>
             <version>0.11.5</version>
         </dependency>
+
+        <!--Spring Documentation Dependencies -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.12</version>
+        </dependency>
     </dependencies>
 
 

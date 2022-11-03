@@ -33,7 +33,7 @@ public class AuthController {
         return ResponseEntity.ok("Account verified successfully!!!");
     }
 
-    @PutMapping("/refresh-token/{id}")
+    @PutMapping("/account-verification/refresh-token/{id}")
     public ResponseEntity<String> refreshToken(@PathVariable Long id){
         authService.updateVerificationToken(id);
         return ResponseEntity.ok("Verification email send!");
