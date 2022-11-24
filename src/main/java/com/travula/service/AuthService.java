@@ -4,6 +4,7 @@ import com.travula.dto.AuthenticationResponse;
 import com.travula.dto.LoginRequest;
 import com.travula.dto.RefreshTokenRequest;
 import com.travula.dto.RegisterRequest;
+import com.travula.exceptions.AlreadyExistException;
 import com.travula.exceptions.SpringRedditException;
 import com.travula.model.NotificationEmail;
 import com.travula.model.User;
@@ -39,6 +40,14 @@ public class AuthService {
 
     @Transactional
     public void signup(RegisterRequest registerRequest){
+        if(userRepository.existsByEmail(registerRequest.getEmail())){
+            throw new AlreadyExistException("Email has a user!!!");
+        }
+        if (userRepository.existsByUsername(registerRequest.getUsername())){
+            throw new AlreadyExistException("Username taken exist!!!");
+        }
+
+
         User user = new User();
         user.setEmail(registerRequest.getEmail());
         user.setUsername(registerRequest.getUsername());
@@ -79,9 +88,9 @@ public class AuthService {
 
         sendVerifyToken(user.getEmail(),verificationTokenRepository.save(verificationToken).getToken());
     }
-    public void updateVerificationToken(Long id){
-        User user = userRepository.findById(id).orElseThrow(
-                ()-> new SpringRedditException("No user with "+ id + " id number"));
+    public void updateVerificationToken(String email){
+        User user = userRepository.findByEmail(email).orElseThrow(
+                ()-> new SpringRedditException("No user with email: "+ email));
         VerificationToken verificationToken = verificationTokenRepository.findByUser(user).orElseThrow(
                 ()-> new SpringRedditException("No token for user "+ user.getUsername()));
 

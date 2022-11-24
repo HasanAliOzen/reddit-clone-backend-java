@@ -33,9 +33,9 @@ public class AuthController {
         return ResponseEntity.ok("Account verified successfully!!!");
     }
 
-    @PutMapping("/account-verification/refresh-token/{id}")
-    public ResponseEntity<String> refreshToken(@PathVariable Long id){
-        authService.updateVerificationToken(id);
+    @PutMapping("/account-verification/refresh-token/{email}")
+    public ResponseEntity<String> refreshToken(@PathVariable String email){
+        authService.updateVerificationToken(email);
         return ResponseEntity.ok("Verification email send!");
     }
 
