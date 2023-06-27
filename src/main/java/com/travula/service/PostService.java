@@ -10,6 +10,8 @@ import com.travula.repository.UserRepository;
 import com.travula.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +22,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class PostService {
     private final PostRepository postRepository;
     private final SubredditRepository subredditRepository;
@@ -30,14 +31,15 @@ public class PostService {
 
     @Transactional
     public void createPost(PostRequest postRequest) {
-        if (postRequest.getPostName().isBlank()){
-            throw  new SpringRedditException("Post name is a must!!!");
+        if (postRequest.getPostName().isBlank()) {
+            throw new SpringRedditException("Post name is a must!!!");
         }
 
-        Subreddit subreddit =subredditRepository.findByName(postRequest.getSubredditName())
-                .orElseThrow(()-> new ProviderNotFoundException("No Subreddit with name " + postRequest.getSubredditName()));
+        Subreddit subreddit = subredditRepository.findByName(postRequest.getSubredditName())
+                .orElseThrow(() -> new ProviderNotFoundException(
+                        "No Subreddit with name " + postRequest.getSubredditName()));
 
-        Post save = mapRequest(postRequest,subreddit,authService.getCurrentUser());
+        Post save = mapRequest(postRequest, subreddit, authService.getCurrentUser());
         save.setCreatedDate(Instant.now());
         Post post = postRepository.save(save);
         subreddit.getPosts().add(post);
@@ -45,14 +47,14 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> getAllPosts() {
-        return postRepository.findAll()
-                .stream().map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public Page<PostResponse> getAllPosts() {
+        return postRepository
+                .findAll(Pageable.unpaged())
+                .map(this::mapToResponse);
     }
 
     private Post mapRequest(PostRequest postRequest, Subreddit subreddit, User user) {
-        if (postRequest == null){
+        if (postRequest == null) {
             return null;
         }
 
@@ -67,14 +69,14 @@ public class PostService {
                 .build();
     }
 
-    private PostResponse mapToResponse(Post post){
-        if (post == null){
+    private PostResponse mapToResponse(Post post) {
+        if (post == null) {
             return null;
         }
-        Vote vote = voteRepository.findByPostAndUser(post,authService.getCurrentUser())
+        Vote vote = voteRepository.findByPostAndUser(post, authService.getCurrentUser())
                 .orElse(Vote.builder()
-                                .voteType(VoteType.NOVOTE)
-                                .build());
+                        .voteType(VoteType.NOVOTE)
+                        .build());
 
         return PostResponse.builder()
                 .postId(post.getId())
@@ -93,7 +95,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponse getPost(Long id) {
         return mapToResponse(postRepository.findById(id)
-                .orElseThrow(()-> new ProviderNotFoundException("No post with id " + id)));
+                .orElseThrow(() -> new ProviderNotFoundException("No post with id " + id)));
     }
 
     @Transactional(readOnly = true)
@@ -102,7 +104,7 @@ public class PostService {
                 .findAllBySubreddit(
                         subredditRepository.findById(id)
                                 .orElseThrow(
-                                        ()-> new ProviderNotFoundException("No subreddit with id " + id)));
+                                        () -> new ProviderNotFoundException("No subreddit with id " + id)));
 
         return postList
                 .stream()
@@ -115,7 +117,7 @@ public class PostService {
                 .findAllByUser(
                         userRepository.findByUsername(username)
                                 .orElseThrow(
-                                        ()-> new ProviderNotFoundException("No user with username " + username)))
+                                        () -> new ProviderNotFoundException("No user with username " + username)))
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @ToString
 @Builder
-
+@Data
 @Entity
 @Table(name = "comment")
 public class Comment extends BaseEntity{

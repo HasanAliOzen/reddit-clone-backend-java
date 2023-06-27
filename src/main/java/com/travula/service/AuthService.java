@@ -124,7 +124,7 @@ public class AuthService {
                 .builder()
                 .authenticationToken(token)
                 .refreshToken(refreshTokenService.generateRefreshToken().getToken())
-                .expiresAt(Instant.now().plus(336,ChronoUnit.HOURS))
+                .expiresAt(Instant.now().plus(36,ChronoUnit.HOURS))
                 .username(loginRequest.getUsername())
                 .build();
     }

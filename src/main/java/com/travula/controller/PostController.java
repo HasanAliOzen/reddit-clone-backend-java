@@ -4,6 +4,7 @@ import com.travula.dto.PostRequest;
 import com.travula.dto.PostResponse;
 import com.travula.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getAllPosts(){
+    public ResponseEntity<Page<PostResponse>> getAllPosts(){
         return ResponseEntity.ok(postService.getAllPosts());
     }
 
